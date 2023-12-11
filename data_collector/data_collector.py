@@ -26,8 +26,9 @@ class DataCollector:
         self.timeframe = timeframe
         self.exchange = exchange
         folder = 'data/'
-        self.file_name = f'{folder}{self.symbol}_{self.timeframe}.csv'
-
+        temp_name = f'{self.symbol}_{self.timeframe}.csv'
+        temp_name = temp_name.replace("/", "_")
+        self.file_name = f'{folder}{temp_name}'
 
     def _save_file(self, new_data):
         if not os.path.isfile(self.file_name):
@@ -48,9 +49,22 @@ class DataCollector:
 
     def continue_collect(self, end):
         existing_data = pd.read_csv(self.file_name, index_col='timestamp')
-        #print(existing_data.index)
         start = pd.to_datetime(existing_data.index[-1]).timestamp() * 1000 + 60000
         return self.collect(start, end)
+
+    def get_last_15_hours_data(self):
+        bars = self.exchange.fetch_ohlcv(self.symbol, since=None, timeframe=self.timeframe, limit=900) # 15 hours
+        contains_none = any(item is None for item in bars[-1])
+        if contains_none:
+            print("WRN! CONTAINS NONE")
+            bars = bars[:-1]
+
+        df = pd.DataFrame(bars, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df.set_index('timestamp', inplace=True)
+        if not df["close"][-1]:
+            df.drop(df.index[-1], inplace=True)
+        return df
 
     def get_last_5_hours_data(self):
         bars = self.exchange.fetch_ohlcv(self.symbol, timeframe=self.timeframe, limit=300) # 5 hours
@@ -61,16 +75,17 @@ class DataCollector:
 
     def get_live_data(self):
         end = datetime.now()
-        start = (end - timedelta(days=2))  # Two days ago
+        start = (end - timedelta(days=1))  # Two days ago
         end = int(end.timestamp()) * 1000
         start = int(start.timestamp()) * 1000
         print(start, end)
-        df = self._get_data(start, end)
-        self._save_file(df)
+        df = self._get_data(start, end, True)
+        #self._save_file(df)
         return df
         
     def get_all_data(self):
         data = pd.read_csv(self.file_name, index_col='timestamp')
+        data.index = pd.to_datetime(data.index)
         return data
 
     def _get_data(self, start, end, non_stop = False):
@@ -91,9 +106,18 @@ class DataCollector:
         df.set_index('timestamp', inplace=True)
         return df
 
-    def collect_until_today(self, start, end):
+    def collect_until_today(self):
+        if os.path.isfile(self.file_name):
+            return
+        if os.path.isfile(self.file_name):
+            existing_data = pd.read_csv(self.file_name, index_col='timestamp')
+            start = pd.to_datetime(existing_data.index[-1]).timestamp() * 1000 + 60000
+            df = self._get_data(start, end, True)
+            self._save_file(df)
+            return
+
         end = datetime.now()
-        start = (end - timedelta(days=3))  # Two days ago
+        start = (end - timedelta(days=120))  # since 120 days ago
         end = int(end.timestamp()) * 1000
         start = int(start.timestamp()) * 1000
         df = self._get_data(start, end, True)

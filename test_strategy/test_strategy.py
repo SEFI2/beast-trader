@@ -1,6 +1,8 @@
 import vectorbt as vbt
+import pandas as pd
 
-def test_strategy(df, strategy_func):
+def test_window_strategy(df_full, df, strategy_func):
+    df = df_full.loc[df.index]
     (buy, sell) = strategy_func(df)
     pf = vbt.Portfolio.from_signals(
         df.close,
@@ -12,17 +14,11 @@ def test_strategy(df, strategy_func):
         fees=0, # TODO
         slippage=0.0025
     )
-
-    # print("Stats:")
-    # print(pf.stats())
-
-    # print()
-    # print("Returns:")
-    # print(pf.returns_stats())
-
-    # print("Asset returns:")
-    # print(pf.asset_returns())
-    # print(pf.total_profit())
-    # print(pf.total_return())
     return pf.total_profit()
+
+def test_strategy(df, strategy_func):
+    window = 900
+    profits = df.groupby(pd.Grouper(freq='15H')).apply(lambda sub_df: test_window_strategy(df, sub_df, strategy_func))
+    #print ("profits", profits)
+    return profits
 

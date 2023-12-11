@@ -1,10 +1,11 @@
 import pandas as pd
 import vectorbt as vbt
-
-def run_supertrend_strategy(df, length=7, multiplier=3):
+import pandas_ta as ta
+def run_supertrend_strategy(df, length, multiplier):
     multiplier = float(multiplier)
-    sti = df.ta.supertrend(length, multiplier)
+    sti = ta.supertrend(df.high, df.low, df.close, length, multiplier)
     trend_dir = f"SUPERTd_{length}_{multiplier}"
+    #print(sti)
     buy_signals = (sti[trend_dir] == 1) & (sti[trend_dir].shift() == -1)
     sell_signals = (sti[trend_dir] == -1) & (sti[trend_dir].shift() == 1)
     return (buy_signals, sell_signals)
@@ -27,7 +28,15 @@ def strategy_supertrend(df):
         keep_pd=True,
         to_2d=False
     )
-    res = indicator.run(df.high, df.low, df.close)
+
+    # length_arr = [7, 10, 5, 7,]
+    # multiplier_arr = [3, 3, 2, 2]
+
+    res = indicator.run(
+        df.high, df.low, df.close,
+        length=7,
+        multiplier=3
+    )
     return (
         res.buy_signals,
         res.sell_signals

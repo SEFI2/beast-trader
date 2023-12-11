@@ -1,11 +1,14 @@
 import vectorbt as vbt
 import numpy as np
 
-def strategy_rsi_ma(close, rsi_window=14, ma_window=50):
+def indicator_rsi_ma(close, rsi_window=14, ma_window=50):
     rsi = vbt.RSI.run(close, window=rsi_window).rsi.to_numpy()
     ma = vbt.MA.run(close, window=ma_window).ma.to_numpy()
-    trend = np.where(rsi > 70, -1, 0) # exit 
+
+    trend = np.where(rsi > 70, -1, 0) # exit
+    rsi = np.where(rsi > 70, -1, 0)
     trend = np.where((rsi < 30) & (close < ma) , 1, trend) # entry
+
     return trend
 
 def strategy_rsi_ma(df):
@@ -16,12 +19,19 @@ def strategy_rsi_ma(df):
         param_names=["rsi_window", "ma_window"],
         output_names=["value"],
     ).from_apply_func(
-        strategy_rsi_ma,
-        rsi_window=14,
-        ma_window=50,
+        indicator_rsi_ma,
+        rsi_window=7,
+        ma_window=20,
     )
-
-    res = indicator.run(df.close)
+    rsi_window_arr = [7, 14, 3, 7]
+    ma_window_arr = [20, 50, 10, 50]
+    res = indicator.run(
+        df.close,
+        rsi_window=7, #rsi_window_arr,
+        ma_window=20 #ma_window_arr,
+        #param_product = True
+    )
+ 
     buy_signals = res.value == 1
     sell_signals = res.value == -1
     return (

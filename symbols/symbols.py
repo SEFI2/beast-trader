@@ -1,13 +1,8 @@
 main_symbols = [
-#    'UNI/USDT', 
     'LINK/USDT', 
     'MATIC/USDT',
-#   'AXS/USDT',
-#    'APE/USDT',
-#    'TRX/USDT',
-#    'SOL/USDT',
-    'BMEX/USDT',
-    'BTC/USDT',
+#    "AVAX/USDT:USDT",
+    'SOL/USDT',
     'ETH/USDT',
 ]
 

@@ -64,11 +64,11 @@ from strategy.supertrend import strategy_supertrend
 
 
 buy_count_leverage_params = {
-    6: 20,
-    5: 10,
-    4: 5,
-    3: 3,
-    2: 2,
+    6: 10,
+    5: 5,
+    4: 3,
+    3: 2,
+    2: 1,
     1: 1,
 }
 
@@ -96,7 +96,7 @@ def risk_management(exchange, symbol, side, amount, stop_loss, take_profit):
     return stop_loss_order, take_profit_order
 
 def try_long(exchange, buy_count, symbol, budget, price, precision):
-    if buy_count < 2:
+    if buy_count < 3:
         print(f"Buy count is less than 3 for {symbol}")
         return
 
@@ -141,7 +141,7 @@ def try_long(exchange, buy_count, symbol, budget, price, precision):
     return budget
 
 def try_short(exchange, sell_count, symbol, budget, price, precision):
-    if sell_count < 2:
+    if sell_count < 3:
         print(f"Sell count is less than 3 for {symbol}")
         return False
 
@@ -192,7 +192,7 @@ def run_live_strategy(exchange, budget, df, symbol, timeframe, precision, strate
     if np.any(buy2[-1]):
         buy_count += 2
     if np.any(buy3[-1]):
-        buy_count += 3
+        buy_count += 2
     
     sell_count = 0
     if np.any(sell1[-1]):
@@ -200,7 +200,7 @@ def run_live_strategy(exchange, budget, df, symbol, timeframe, precision, strate
     if np.any(sell2[-1]):
         sell_count += 2
     if np.any(sell3[-1]):
-        sell_count += 3
+        sell_count += 2
     print(f"Buy count {buy_count}")
     print(f"Sell count {sell_count}")
 
@@ -274,18 +274,18 @@ def run_all_bots():
             "account_name": "matic",
             "timestamp": None,
             "symbol": "MATICUSDT",
-            "strategy_func1": strategy_rsi_ma,
+            "strategy_func1": strategy_supertrend,
             "strategy_func2": strategy_ema,
-            "strategy_func3": strategy_supertrend,
+            "strategy_func3": strategy_rsi_ma,
             "precision": 10000,
         },
         {
             "account_name": "sol",
             "timestamp": None,
             "symbol": "SOLUSDT",
-            "strategy_func1": strategy_rsi_ma,
+            "strategy_func1": strategy_supertrend,
             "strategy_func2": strategy_ema,
-            "strategy_func3": strategy_supertrend,
+            "strategy_func3": strategy_rsi_ma,
             "precision": 10000
         },
         {
@@ -301,18 +301,18 @@ def run_all_bots():
             "account_name": "ether",
             "timestamp": None,
             "symbol": "ETHUSDT",
-            "strategy_func1": strategy_rsi_ma,
+            "strategy_func1": strategy_supertrend,
             "strategy_func2": strategy_ema,
-            "strategy_func3": strategy_supertrend,
+            "strategy_func3": strategy_rsi_ma,
             "precision": 10000
         },
         {
             "account_name": "link",
             "timestamp": None,
             "symbol": "LINKUSDT",
-            "strategy_func1": strategy_ema,
+            "strategy_func1": strategy_supertrend,
             "strategy_func2": strategy_rsi_ma,
-            "strategy_func3": strategy_supertrend,
+            "strategy_func3": strategy_ema,
             "precision": 10000
         },
     ]

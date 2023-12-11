@@ -2,7 +2,8 @@
 import vectorbt as vbt
 import pandas as pd
 from test_strategy.test_strategy import test_strategy
-from symbols.symbols import acceptable_symbols
+from symbols.symbols import main_symbols
+
 # -*- coding: utf-8 -*-
 
 import ccxt
@@ -33,7 +34,7 @@ from strategy.ema_price_crossover import strategy_ema_price_crossover
 def run():
     timeframe = "1m"
     all_symbols = []
-    for symbol in acceptable_symbols:
+    for symbol in main_symbols:
         data_collector = DataCollector(exchange, symbol, timeframe)
         df = data_collector.get_all_data()
         

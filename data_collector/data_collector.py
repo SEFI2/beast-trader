@@ -94,12 +94,19 @@ class DataCollector:
             if non_stop is False and start >= end:
                 break
             bars = self.exchange.fetch_ohlcv(self.symbol, timeframe=self.timeframe, since=start, limit=900) # 15 hours
+            time.sleep(0.7)
+
             if len(bars) == 0:
                 break
+
+            contains_none = any(item is None for item in bars[-1])
+            if contains_none:
+                print("WRN! CONTAINS NONE")
+                bars = bars[:-1]
+            
             start = bars[-1][0] + 60000
             data += bars
 
-            time.sleep(1)
 
         df = pd.DataFrame(data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')

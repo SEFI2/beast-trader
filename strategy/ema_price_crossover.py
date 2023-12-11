@@ -23,7 +23,7 @@ def strategy_ema_price_crossover(df):
         output_names=["buy_signals", "sell_signals"],
     ).from_apply_func(
         proxy_ema_price_crossover,
-        length=800,
+        length=200,
         threshold_percentage=1,
         keep_pd=True,
         to_2d=False

@@ -38,8 +38,22 @@ accounts = {
         "account_id": "2202564",
         "apiKey": "7mT68GGufNsN2oAXkYrJ15_d",
         "secret": "VCyljkhsfVK01LmhCowKMmy9lmJXViq8pBxox2CEmPL4tN1t"
+    },
+    "ava": {
+        "account_id": "2202647",
+        "apiKey": "kA2Wr6dTL1u7pwpdmUObTvAG",
+        "secret": "vGeDVoBiYzkXZsz5cCYMitAUsxFtKUUm4P6wCoJWr10_SSfy"
+    },
+    "sol": {
+        "account_id": "2202650",
+        "apiKey": "zqxAniO4W_NwNjwzvkWaOx0W",
+        "secret": "hFhihTPXq4Hnhz6nTy1snKMYh79fjThcQfFBNMX7nFd11eT7"
+    },
+    "link": {
+        "account_id": "2202569",
+        "apiKey": "AbnJbnyepEZrdjZazhEI1AYZ",
+        "secret": "rhxBs1BRArblqwj6xDkgNQxXgYf_rD3trw-OUKnlIG7bTW72"
     }
-
 }
 
 #exchange.set_sandbox_mode(True)
@@ -50,24 +64,50 @@ from strategy.supertrend import strategy_supertrend
 
 
 buy_count_leverage_params = {
-    6: 50,
-    5: 20,
-    4: 10,
-    3: 5,
+    6: 20,
+    5: 10,
+    4: 5,
+    3: 3,
     2: 2,
     1: 1,
 }
 
+def risk_management(exchange, symbol, side, amount, stop_loss, take_profit):
+    # Stop loss
+    stop_loss_order = exchange.create_order(
+        symbol,
+        type='limit',
+        side='sell' if side == 'buy' else 'buy',
+        amount=amount,
+        price=stop_loss
+    )
+    print(f"Stop-Loss: {symbol} {side} {stop_loss}")
 
-def try_long(exchange, buy_count, symbol, budget, price):
-    if buy_count == 0:
-        print(f"Buy count is zero for {symbol}")
+    # Create the take-profit order
+    take_profit_order = exchange.create_order(
+        symbol,
+        type='limit',
+        side='sell' if side == 'buy' else 'buy',
+        amount=amount,
+        price=take_profit
+    )
+    print(f"Take-profit: {symbol} {side} {take_profit}")
+
+    return stop_loss_order, take_profit_order
+
+def try_long(exchange, buy_count, symbol, budget, price, precision):
+    if buy_count < 2:
+        print(f"Buy count is less than 3 for {symbol}")
         return
-    
-    amount = (int(round(budget / price)) // 10) * 10
+
+    amount = budget / price     
     print(f"Trying to buy {symbol}. Buy count {buy_count}. Price: {price}. Budget: {budget}. Amount: {amount}")
-    amount = (amount//10) * 1000
+    if precision:
+        amount *= precision
+        print(f"Add precision {precision} {amount}")
+
     if amount == 0:
+        print("Amount is zero")
         return
     print(amount)
     
@@ -86,6 +126,9 @@ def try_long(exchange, buy_count, symbol, budget, price):
         buy_amount = order["filled"]
         spend_amount = order['cost']
         print(f"BUY!! {symbol} - {buy_amount} - {price} - {spend_amount}", order)
+        stop_loss = price - price * 0.04
+        take_profit = price + price * 0.02
+        risk_management(exchange, symbol, "buy", amount, stop_loss, take_profit)
         return (
             buy_amount,
             price,
@@ -97,14 +140,16 @@ def try_long(exchange, buy_count, symbol, budget, price):
         return None
     return budget
 
-def try_short(exchange, sell_count, symbol, budget, price):
-    if sell_count == 0:
-        print(f"Sell count is zero for {symbol}")
+def try_short(exchange, sell_count, symbol, budget, price, precision):
+    if sell_count < 2:
+        print(f"Sell count is less than 3 for {symbol}")
         return False
 
-    amount = (int(round(budget / price)) // 10) * 10
+    amount = budget / price     
     print(f"Trying to sell {symbol}. Sell count {sell_count}. Price: {price}. Budget: {budget}. Amount: {amount}")
-    amount = (amount//10) * 1000
+    if precision:
+        amount *= precision
+        print(f"Add precision {precision} {amount}")
     if amount == 0:
         return
     print(amount)
@@ -119,6 +164,9 @@ def try_short(exchange, sell_count, symbol, budget, price):
         sell_amount = order["filled"]
         spend_amount = order['cost']
         print(f"SELL!! {symbol} - {sell_amount} - {price} - {spend_amount}", order)
+        stop_loss = price + price * 0.04
+        take_profit = price - price * 0.02
+        risk_management(exchange, symbol, "sell", amount, stop_loss, take_profit)
         return (
             sell_amount,
             price,
@@ -131,56 +179,75 @@ def try_short(exchange, sell_count, symbol, budget, price):
     return budget
 
 
-def run_live_strategy(exchange, budget, df, symbol, timeframe, strategy_func1, strategy_func2, strategy_func3):
+def run_live_strategy(exchange, budget, df, symbol, timeframe, precision, strategy_func1, strategy_func2, strategy_func3):
     print(f"Running live strategy for {symbol}")
     (buy1, sell1) = strategy_func1(df)
     (buy2, sell2) = strategy_func2(df)
     (buy3, sell3) = strategy_func3(df)
-    print(buy1[-1])
-    print(buy2[-1])
-    print(buy3[-1])
+    print(buy1[-1], buy2[-1], buy3[-1])
+    print(sell1[-1], sell2[-1], sell3[-1])
+    buy_count = 0
+    if np.any(buy1[-1]):
+        buy_count += 1
+    if np.any(buy2[-1]):
+        buy_count += 2
+    if np.any(buy3[-1]):
+        buy_count += 3
     
-    buy_count = (buy1[-1] is True) * 3 + (buy2[-1] is True) * 2 + (buy3[-1] is True) * 1
-    sell_count = (sell1[-1] is True) * 3 + (sell2[-1] is True) * 2 + (sell3[-1] is True) * 1
+    sell_count = 0
+    if np.any(sell1[-1]):
+        sell_count += 1
+    if np.any(sell2[-1]):
+        sell_count += 2
+    if np.any(sell3[-1]):
+        sell_count += 3
+    print(f"Buy count {buy_count}")
+    print(f"Sell count {sell_count}")
 
     price = df["close"][-1]
-    buy_order = try_long(exchange, buy_count, symbol, budget, price)
-    if buy_order:
-        return buy_order
-
-    sell_order = try_short(exchange, sell_count, symbol, budget, price)
-    if sell_order:
-        return -sell_order
+    if buy_count > sell_count:
+        buy_order = try_long(exchange, buy_count, symbol, budget, price, precision)
+        if buy_order:
+            return buy_order
+    elif sell_count >= buy_count:
+        sell_order = try_short(exchange, sell_count, symbol, budget, price, precision)
+        if sell_order:
+            return sell_order
+    print(f"No strategy is used for {symbol} for now..")
     return 0
 
 
 def run_bot(config):
     account_name = config["account_name"]
+    precision = config["precision"]
+    symbol = config["symbol"]
     exchange = ccxt.bitmex({
         'apiKey': accounts[account_name]["apiKey"],
         'secret': accounts[account_name]["secret"],
-        #'apiKey': '0y7QTbMmps5eWg-fmGS3uOC0',
-        #'secret': 'YWZOQMzCFchD4t05CxE0ptuIgcAblctmdxpH4GVlNKC1Yaxl',
     })
-    exchange.create_market_buy_order
 
-    balance = exchange.fetch_balance()
-    print(balance)
+    try:
+        balance = exchange.fetch_balance()
+    except Exception as e:
+        print(f"Cannot fetch the balance for {symbol} and {account_name}")
+        print(e)
+        return
     timeframe = "1m"
     last_timestamp = config["timestamp"]
-    symbol = config["symbol"]
     strategy_func1 = config["strategy_func1"]
     strategy_func2 = config["strategy_func2"]
     strategy_func3 = config["strategy_func3"]
 
     usdt_balance = balance['USDT']['free']
     print(f"Current balance for {symbol} and {account_name} is {usdt_balance}")
-    total_bot_budget = usdt_balance
-
+    if usdt_balance > 10:
+        total_bot_budget = usdt_balance / 2
+    else:
+        total_bot_budget = usdt_balance
 
     try:
         data_collector = DataCollector(exchange, symbol, timeframe)
-        df = data_collector.get_last_15_hours_data()
+        df = data_collector.get_live_data()
     except Exception as e:
         print(f"Error while retrieveing data for {symbol}:", e)
         return
@@ -192,7 +259,7 @@ def run_bot(config):
         last_timestamp = df.index[-1]
 
     print(f"Timestamp {symbol}", last_timestamp)
-    out = run_live_strategy(exchange, total_bot_budget, df, symbol, timeframe, strategy_func1, strategy_func2, strategy_func3)
+    out = run_live_strategy(exchange, total_bot_budget, df, symbol, timeframe, precision, strategy_func1, strategy_func2, strategy_func3)
 
     #config["budget"] += out
     config["timestamp"] = last_timestamp
@@ -209,7 +276,26 @@ def run_all_bots():
             "symbol": "MATICUSDT",
             "strategy_func1": strategy_rsi_ma,
             "strategy_func2": strategy_ema,
-            "strategy_func3": strategy_supertrend
+            "strategy_func3": strategy_supertrend,
+            "precision": 10000,
+        },
+        {
+            "account_name": "sol",
+            "timestamp": None,
+            "symbol": "SOLUSDT",
+            "strategy_func1": strategy_rsi_ma,
+            "strategy_func2": strategy_ema,
+            "strategy_func3": strategy_supertrend,
+            "precision": 10000
+        },
+        {
+            "account_name": "ava",
+            "timestamp": None,
+            "symbol": "AVAXUSDT",
+            "strategy_func1": strategy_supertrend,
+            "strategy_func2": strategy_ema,
+            "strategy_func3": strategy_rsi_ma,
+            "precision": 10000
         },
         {
             "account_name": "ether",
@@ -217,25 +303,22 @@ def run_all_bots():
             "symbol": "ETHUSDT",
             "strategy_func1": strategy_rsi_ma,
             "strategy_func2": strategy_ema,
-            "strategy_func3": strategy_supertrend
+            "strategy_func3": strategy_supertrend,
+            "precision": 10000
         },
-
-        # {
-        #     "timestamp": None,
-        #     "budget": 10,
-        #     "symbol": "LINK/USDT",
-        #     "strategy_func": strategy_rsi_ma
-        # },
-        # {
-        #     "timestamp": None,
-        #     "budget": 10,
-        #     "symbol": "GMT/USDT:USDT",
-        #     "strategy_func": strategy_rsi_ma
-        # }
+        {
+            "account_name": "link",
+            "timestamp": None,
+            "symbol": "LINKUSDT",
+            "strategy_func1": strategy_ema,
+            "strategy_func2": strategy_rsi_ma,
+            "strategy_func3": strategy_supertrend,
+            "precision": 10000
+        },
     ]
     for config in configurations:
         run_bot(config)
-        schedule.every(10).seconds.do(run_bot, config)
+        schedule.every(20).seconds.do(run_bot, config)
         time.sleep(1)
 
     while True:

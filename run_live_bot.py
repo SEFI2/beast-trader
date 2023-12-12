@@ -23,6 +23,7 @@ import warnings
 from plot_strategy import plot_strategies
 from strategy.ema import strategy_ema
 from strategy.rsi_ma import strategy_rsi_ma
+from strategy.macd import strategy_macd
 
 warnings.filterwarnings("ignore")
 #warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -79,7 +80,11 @@ def risk_management(exchange, symbol, side, amount, stop_loss, take_profit):
         type='limit',
         side='sell' if side == 'buy' else 'buy',
         amount=amount,
-        price=stop_loss
+        price=None,
+        params ={
+            "stopProce": stop_loss
+        }
+        
     )
     print(f"Stop-Loss: {symbol} {side} {stop_loss}")
 
@@ -89,7 +94,10 @@ def risk_management(exchange, symbol, side, amount, stop_loss, take_profit):
         type='limit',
         side='sell' if side == 'buy' else 'buy',
         amount=amount,
-        price=take_profit
+        price=None,
+        params={
+            "stopPrice": take_profit
+        }
     )
     print(f"Take-profit: {symbol} {side} {take_profit}")
 
@@ -179,37 +187,21 @@ def try_short(exchange, sell_count, symbol, budget, price, precision):
     return budget
 
 
-def run_live_strategy(exchange, budget, df, symbol, timeframe, precision, strategy_func1, strategy_func2, strategy_func3):
+def run_live_strategy(exchange, budget, df, symbol, timeframe, precision, strategy_funcs):
     print(f"Running live strategy for {symbol}")
-    (buy1, sell1) = strategy_func1(df)
-    (buy2, sell2) = strategy_func2(df)
-    (buy3, sell3) = strategy_func3(df)
-    print(buy1[-1], buy2[-1], buy3[-1])
-    print(sell1[-1], sell2[-1], sell3[-1])
-    buy_count = 0
-    if np.any(buy1[-1]):
-        buy_count += 1
-    if np.any(buy2[-1]):
-        buy_count += 2
-    if np.any(buy3[-1]):
-        buy_count += 2
-    
-    sell_count = 0
-    if np.any(sell1[-1]):
-        sell_count += 1
-    if np.any(sell2[-1]):
-        sell_count += 2
-    if np.any(sell3[-1]):
-        sell_count += 2
+
+    for strategy_func1 in strategy_funcs:
+        (buy, sell) = strategy_func1(df)
+
     print(f"Buy count {buy_count}")
     print(f"Sell count {sell_count}")
 
     price = df["close"][-1]
-    if buy_count > sell_count:
+    if buy_count >= sell_count:
         buy_order = try_long(exchange, buy_count, symbol, budget, price, precision)
         if buy_order:
             return buy_order
-    elif sell_count >= buy_count:
+    elif sell_count > buy_count:
         sell_order = try_short(exchange, sell_count, symbol, budget, price, precision)
         if sell_order:
             return sell_order
@@ -234,9 +226,7 @@ def run_bot(config):
         return
     timeframe = "1m"
     last_timestamp = config["timestamp"]
-    strategy_func1 = config["strategy_func1"]
-    strategy_func2 = config["strategy_func2"]
-    strategy_func3 = config["strategy_func3"]
+    strategy_funcs = config["strategy_funcs"]
 
     usdt_balance = balance['USDT']['free']
     print(f"Current balance for {symbol} and {account_name} is {usdt_balance}")
@@ -259,7 +249,7 @@ def run_bot(config):
         last_timestamp = df.index[-1]
 
     print(f"Timestamp {symbol}", last_timestamp)
-    out = run_live_strategy(exchange, total_bot_budget, df, symbol, timeframe, precision, strategy_func1, strategy_func2, strategy_func3)
+    out = run_live_strategy(exchange, total_bot_budget, df, symbol, timeframe, precision, strategy_funcs)
 
     #config["budget"] += out
     config["timestamp"] = last_timestamp
@@ -274,45 +264,35 @@ def run_all_bots():
             "account_name": "matic",
             "timestamp": None,
             "symbol": "MATICUSDT",
-            "strategy_func1": strategy_supertrend,
-            "strategy_func2": strategy_ema,
-            "strategy_func3": strategy_rsi_ma,
+            "strategy_funcs": [strategy_macd, strategy_ema, strategy_rsi_ma] ,
             "precision": 10000,
         },
         {
             "account_name": "sol",
             "timestamp": None,
             "symbol": "SOLUSDT",
-            "strategy_func1": strategy_supertrend,
-            "strategy_func2": strategy_ema,
-            "strategy_func3": strategy_rsi_ma,
+            "strategy_funcs": [strategy_macd, strategy_ema, strategy_rsi_ma] ,
             "precision": 10000
         },
         {
             "account_name": "ava",
             "timestamp": None,
             "symbol": "AVAXUSDT",
-            "strategy_func1": strategy_supertrend,
-            "strategy_func2": strategy_ema,
-            "strategy_func3": strategy_rsi_ma,
+            "strategy_funcs": [strategy_macd, strategy_ema, strategy_rsi_ma] ,
             "precision": 10000
         },
         {
             "account_name": "ether",
             "timestamp": None,
             "symbol": "ETHUSDT",
-            "strategy_func1": strategy_supertrend,
-            "strategy_func2": strategy_ema,
-            "strategy_func3": strategy_rsi_ma,
+            "strategy_funcs": [strategy_macd, strategy_ema, strategy_rsi_ma] ,
             "precision": 10000
         },
         {
             "account_name": "link",
             "timestamp": None,
             "symbol": "LINKUSDT",
-            "strategy_func1": strategy_supertrend,
-            "strategy_func2": strategy_rsi_ma,
-            "strategy_func3": strategy_ema,
+            "strategy_funcs": [strategy_macd, strategy_ema, strategy_rsi_ma] ,
             "precision": 10000
         },
     ]

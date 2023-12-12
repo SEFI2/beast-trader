@@ -29,7 +29,7 @@ def strategy_ema_price_crossover(df):
         to_2d=False
     )
 
-    length_arr = [100]
+    length_arr = [20]
     threshold_percentage_arr = [1]
 
     res = indicator.run(

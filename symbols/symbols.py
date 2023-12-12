@@ -1,9 +1,10 @@
 main_symbols = [
     'LINK/USDT', 
     'MATIC/USDT',
-#    "AVAX/USDT:USDT",
+   "AVAX/USDT:USDT",
     'SOL/USDT',
     'ETH/USDT',
+
 ]
 
 acceptable_symbols = [

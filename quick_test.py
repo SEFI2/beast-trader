@@ -30,13 +30,15 @@ exchange = ccxt.bitmex({
 from strategy.rsi_ma import strategy_rsi_ma
 from strategy.supertrend import strategy_supertrend
 from strategy.ema_price_crossover import strategy_ema_price_crossover
+from strategy.ema import strategy_ema
+from strategy.macd import strategy_macd
 
 def run():
     timeframe = "1m"
     all_symbols = []
     for symbol in main_symbols:
         data_collector = DataCollector(exchange, symbol, timeframe)
-        df = data_collector.get_all_data()
+        df = data_collector.get_live_data()
         
         if df.empty:
             continue
@@ -44,7 +46,7 @@ def run():
         if len(df.index) < 200:
             continue
 
-        test_data = test_strategy(df, strategy_ema_price_crossover)
+        test_data = test_strategy(df, [strategy_rsi_ma, strategy_ema_price_crossover, strategy_macd, strategy_ema, strategy_supertrend])
         print(test_data)
         test_data = test_data.reset_index()
         #test_data.columns = ['timestamp', 'profits', "1", "2", "3"]
@@ -62,7 +64,6 @@ def run():
     fig.update_layout(autosize=False, width=3000, height=1000)
 
     fig.show()
-    return
     
 
 

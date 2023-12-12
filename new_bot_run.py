@@ -29,7 +29,7 @@ def run_all_bots():
             "symbol": "LTCUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_supertrend,
-            "leverage": 2,
+            "leverage": 4,
             "precision": 1000
         },
         {
@@ -37,7 +37,7 @@ def run_all_bots():
             "symbol": "LINKUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 3,
+            "leverage": 10,
             "precision": 1000
         },
         {
@@ -45,7 +45,7 @@ def run_all_bots():
             "symbol": "SOLUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_ema_price_crossover,
-            "leverage": 2,
+            "leverage": 15,
             "precision": 10000
         },
         {
@@ -53,7 +53,7 @@ def run_all_bots():
             "symbol": "DOGEUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_ema_price_crossover,
-            "leverage": 3,
+            "leverage": 5,
             "precision": 1000
         },
         {
@@ -61,7 +61,15 @@ def run_all_bots():
             "symbol": "ETHUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 2,
+            "leverage": 10,
+            "precision": 100000
+        },
+        {
+            "account_name": "ether",
+            "symbol": "NTRNUSDT",
+            "timeframe": "1m",
+            "strategy_func": strategy_rsi_ma,
+            "leverage": 10,
             "precision": 100000
         },
         {
@@ -70,7 +78,24 @@ def run_all_bots():
             "timeframe": "1m",
             "strategy_func": strategy_macd,
             "leverage": 2,
-            "precision": 100000
+            "precision": 1000
+        },
+        {
+            "account_name": "kadirpili",
+            "symbol": "APTUSD",
+            "timeframe": "1m",
+            "strategy_func": strategy_rsi_ma,
+            "leverage": 2,
+            "precision": 10000
+        },
+
+        {
+            "account_name": "kadirpili",
+            "symbol": "MATICUSDT",
+            "timeframe": "1m",
+            "strategy_func": strategy_rsi_ma,
+            "leverage": 2,
+            "precision": 10000
         },
     ]
     timeframe = "1m"

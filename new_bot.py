@@ -8,9 +8,9 @@ class Bot(BotBase):
     
     def _make_stop_loss(self, side, price, amount):
         if side == "sell":
-            stop_loss = price + price * 0.015
+            stop_loss = price + price * 0.01
         else:
-            stop_loss = price - price * 0.015
+            stop_loss = price - price * 0.01
 
         print(f"stop_loss_order @{self.symbol} {stop_loss} {amount}")
         stop_loss_order = self._make_order(
@@ -28,9 +28,9 @@ class Bot(BotBase):
 
     def _make_take_profit(self, side, price, amount):
         if side == "sell":
-            take_profit = price - price * 0.005
+            take_profit = price - price * 0.003
         else:
-            take_profit = price + price * 0.005
+            take_profit = price + price * 0.003
 
         print(f"take_profit_order @{self.symbol} {take_profit} {amount}")
         take_profit_order = self._make_order(
@@ -69,15 +69,19 @@ class Bot(BotBase):
         price = self._get_price()
         leverage = self._get_leverage()
         balance = self._get_leveraged_balance()
-
-        budget = balance / 10      
-        if (budget / price) * self.precision < self.precision:
-            print(f"@{self.symbol} less precision")
-            budget = balance
+        portions = [10, 5, 3, 2, 1]
+        for portion in portions: 
+            budget = balance / portion
+            if (budget / price) * self.precision >= self.precision:
+                print(f"@{self.symbol} found precision at portion {portion}")
+                budget = balance
+                break
+            
         amount = budget / price
 
         print(f"Current leverage balance {balance} at leverage {leverage} and budget {budget}")
         print(f"Trying short or long @{self.symbol} at price {price} with amount {amount}.")
+
 
         amount *= self.precision
         if buy:
@@ -87,9 +91,20 @@ class Bot(BotBase):
         elif sell:
             if self._try_short(amount):
                 return self._risk_manager("sell", price, amount)
+        self.exchange.private_get_position()
         return False
 
+    def analyze_positions(self):
+        markets = self.exchange.load_markets()
+        positions = self.exchange.fetch_positions(symbols=[self.symbol])
+        for position in positions:
+            print(position["info"])
+
+
+
     def _run_strategy(self):
+        self.analyze_positions()
+
         (buy, sell) = self._strategy_signal()
         if buy is np.True_ or buy is np.True_:
             return self._try_short_long(buy, sell)

@@ -18,8 +18,8 @@ def test_window_strategy(df_full, df, strategy_funcs):
     print("sell")
     print(sell)
     print((len(strategy_funcs)+1) // 2)
-    buy = buy >= len(strategy_funcs)
-    sell = sell >= len(strategy_funcs)
+    buy = buy >= len(strategy_funcs) - 1
+    sell = sell >= len(strategy_funcs) - 1
     true_count = (buy == True).sum()
     print("true_count", true_count)
     true_count = (sell == True).sum()

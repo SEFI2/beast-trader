@@ -190,11 +190,24 @@ def try_short(exchange, sell_count, symbol, budget, price, precision):
 def run_live_strategy(exchange, budget, df, symbol, timeframe, precision, strategy_funcs):
     print(f"Running live strategy for {symbol}")
 
-    for strategy_func1 in strategy_funcs:
-        (buy, sell) = strategy_func1(df)
+    buy = None
+    sell = None
+    for index, strategy_func in enumerate(strategy_funcs):
+        (buy_new, sell_new) = strategy_func(df)
+        if buy is None:
+            buy = buy_new.astype(int)
+            sell = sell_new.astype(int)
+        else:
+            buy = buy + buy_new.astype(int)
+            sell = sell + sell_new.astype(int)
 
-    print(f"Buy count {buy_count}")
-    print(f"Sell count {sell_count}")
+    buy_count = buy[-1]
+    sell_count = sell[-1]
+    # if buy_count < len(strategy_funcs):
+    #     return
+
+    print("buy_count", buy_count)
+    print("sell_count", sell_count)
 
     price = df["close"][-1]
     if buy_count >= sell_count:

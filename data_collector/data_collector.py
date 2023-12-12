@@ -75,7 +75,7 @@ class DataCollector:
 
     def get_live_data(self):
         end = datetime.now()
-        start = (end - timedelta(days=2))  # Two days ago
+        start = (end - timedelta(days=1))  # Two days ago
         end = int(end.timestamp()) * 1000
         start = int(start.timestamp()) * 1000
         print(start, end)

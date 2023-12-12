@@ -6,8 +6,8 @@ def run_supertrend_strategy(df, length, multiplier):
     sti = ta.supertrend(df.high, df.low, df.close, length, multiplier)
     trend_dir = f"SUPERTd_{length}_{multiplier}"
     #print(sti)
-    buy_signals = (sti[trend_dir] == 1)
-    sell_signals = (sti[trend_dir] == -1)
+    buy_signals = (sti[trend_dir] == 1) & (sti[trend_dir].shift() == -1)
+    sell_signals = (sti[trend_dir] == -1) & (sti[trend_dir].shift() == 1)
     return (buy_signals, sell_signals)
 
 def proxy_supertrend(high, low, close, length, multiplier):

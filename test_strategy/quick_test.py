@@ -66,6 +66,32 @@ def run():
     fig.show()
     
 
+from test_strategy.test_strategy import test_one_strategy
+from volatility.volatility import check_market_volatility
+def run_one():
+    timeframe = "1m"
+    all_symbols = []
+    symbol = "AVAXUSDT"
+
+    data_collector = DataCollector(exchange, symbol, timeframe)
+    df = data_collector.get_live_data()
+    if check_market_volatility(df, 0.5):
+        print(f"{symbol} market too volatile to enter")
+
+    (entry_trades, exit_trades, returns) = test_one_strategy(df, strategy_supertrend)
+    print(entry_trades, exit_trades, returns)
+
+    # test_data.columns = ['timestamp', 'profits']
+    # test_data['symbol'] = symbol
+    # test_data['profits'] = test_data['profits']
+
+    # df = pd.concat(all_symbols)
+    # fig = px.line(df, x="timestamp", y="profits", color="symbol", facet_col_wrap=3)
+    # fig.add_hline(y=0, line_dash="dash", line_color="red")  # Customize line properties as needed
+    # fig.update_layout(autosize=False, width=3000, height=1000)
+
+    # fig.show()
 
 
-run()
+run_one()
+#run()

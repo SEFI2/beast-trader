@@ -1,6 +1,25 @@
 import vectorbt as vbt
 import pandas as pd
 
+def test_one_strategy(df, strategy_func):
+    (buy, sell) = strategy_func(df)
+    pf = vbt.Portfolio.from_signals(
+        df.close,
+        entries=buy,
+        exits=sell,
+        #short_entries=False,
+        #short_exits=False,
+        init_cash=100_000,
+        fees=0, # TODO
+        slippage=0.0025
+    )
+
+    return (
+        pf.get_entry_trades(),
+        pf.get_exit_trades(),
+        pf.total_return()
+    )
+
 def test_window_strategy(df_full, df, strategy_funcs):
     df = df_full.loc[df.index]
     buy = None
@@ -37,11 +56,15 @@ def test_window_strategy(df_full, df, strategy_funcs):
         fees=0, # TODO
         slippage=0.0025
     )
+    pf.entry_trades()
+
     return pf.total_return() * 100
 
 def test_strategy(df, strategy_funcs):
     window = 900
-    profits = df.groupby(pd.Grouper(freq='15H')).apply(lambda sub_df: test_window_strategy(df, sub_df, strategy_funcs))
+    #profits = df.groupby(pd.Grouper(freq='15H')).apply(lambda sub_df: test_window_strategy(df, sub_df, strategy_funcs))
+    profits = test_window_strategy()
+
     #print ("profits", profits)
     return profits
 

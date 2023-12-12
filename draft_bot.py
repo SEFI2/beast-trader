@@ -62,12 +62,13 @@ accounts = {
 from data_collector.data_collector import DataCollector
 from strategy_finder.stategy_sorter import find_best_strategy
 from strategy.supertrend import strategy_supertrend
-
+from strategy.ema_price_crossover import strategy_ema_price_crossover
+from strategy.sma import strategy_sma
 
 buy_count_leverage_params = {
-    6: 10,
-    5: 5,
-    4: 3,
+    6: 5,
+    5: 3,
+    4: 2,
     3: 2,
     2: 1,
     1: 1,
@@ -77,12 +78,12 @@ def risk_management(exchange, symbol, side, amount, stop_loss, take_profit):
     # Stop loss
     stop_loss_order = exchange.create_order(
         symbol,
-        type='limit',
+        type='market',
         side='sell' if side == 'buy' else 'buy',
         amount=amount,
         price=None,
         params ={
-            "stopProce": stop_loss
+            "stopPx": stop_loss
         }
         
     )
@@ -91,12 +92,12 @@ def risk_management(exchange, symbol, side, amount, stop_loss, take_profit):
     # Create the take-profit order
     take_profit_order = exchange.create_order(
         symbol,
-        type='limit',
+        type='market',
         side='sell' if side == 'buy' else 'buy',
         amount=amount,
         price=None,
         params={
-            "stopPrice": take_profit
+            "stopPx": take_profit
         }
     )
     print(f"Take-profit: {symbol} {side} {take_profit}")
@@ -277,38 +278,32 @@ def run_all_bots():
             "account_name": "matic",
             "timestamp": None,
             "symbol": "MATICUSDT",
-            "strategy_funcs": [strategy_macd, strategy_ema, strategy_rsi_ma] ,
+            "strategy_funcs": [strategy_macd, strategy_sma, strategy_ema,  strategy_rsi_ma, strategy_ema_price_crossover] ,
             "precision": 10000,
         },
         {
             "account_name": "sol",
             "timestamp": None,
             "symbol": "SOLUSDT",
-            "strategy_funcs": [strategy_macd, strategy_ema, strategy_rsi_ma] ,
-            "precision": 10000
-        },
-        {
-            "account_name": "ava",
-            "timestamp": None,
-            "symbol": "AVAXUSDT",
-            "strategy_funcs": [strategy_macd, strategy_ema, strategy_rsi_ma] ,
+            "strategy_funcs": [strategy_macd, strategy_sma, strategy_ema, strategy_rsi_ma, strategy_ema_price_crossover] ,
             "precision": 10000
         },
         {
             "account_name": "ether",
             "timestamp": None,
             "symbol": "ETHUSDT",
-            "strategy_funcs": [strategy_macd, strategy_ema, strategy_rsi_ma] ,
+            "strategy_funcs": [strategy_macd, strategy_sma, strategy_ema, strategy_rsi_ma, strategy_ema_price_crossover] ,
             "precision": 10000
         },
         {
             "account_name": "link",
             "timestamp": None,
             "symbol": "LINKUSDT",
-            "strategy_funcs": [strategy_macd, strategy_ema, strategy_rsi_ma] ,
+            "strategy_funcs": [strategy_macd, strategy_sma, strategy_ema, strategy_rsi_ma, strategy_ema_price_crossover] ,
             "precision": 10000
         },
     ]
+
     for config in configurations:
         run_bot(config)
         schedule.every(20).seconds.do(run_bot, config)

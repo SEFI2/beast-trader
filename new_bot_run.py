@@ -30,8 +30,8 @@ def run_all_bots():
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
             "leverage": 10,
-            "precision": 10000,
-            "minAmount": 1,
+            "precision": 1000,
+            "minAmount": 0.1,
         },
         {
             "account_name": "doge",

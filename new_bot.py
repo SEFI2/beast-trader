@@ -1,6 +1,9 @@
 from new_bot_base import BotBase
 from volatility.volatility import if_market_volatile
 import numpy as np
+from datetime import datetime
+from dateutil import parser
+import pytz
 
 class Bot(BotBase):
     def __init__(self, account_name, symbol, timeframe, strategy_func, leverage, precision):
@@ -86,21 +89,58 @@ class Bot(BotBase):
         amount *= self.precision
         if buy:
             if self._try_long(amount):
-                return self._risk_manager("buy", price, amount)
+                return True
+                #return self._risk_manager("buy", price, amount)
             return False
         elif sell:
             if self._try_short(amount):
-                return self._risk_manager("sell", price, amount)
+                return True
+                #return self._risk_manager("sell", price, amount)
         self.exchange.private_get_position()
         return False
 
+    def _data_last_time(self):
+        return self.data.index[-1]
+
     def analyze_positions(self):
-        markets = self.exchange.load_markets()
-        positions = self.exchange.fetch_positions(symbols=[self.symbol])
-        for position in positions:
-            print(position["info"])
+        try:
+            markets = self.exchange.load_markets()
+            positions = self.exchange.fetch_positions()
+            for position in positions:
+                info = position["info"]
+                if info["symbol"] != self.symbol:
+                    continue
+                
+                roe = info['unrealisedRoePcnt']
 
+                if "unrealisedRoePcnt" in info:
+                    roe = float(info['unrealisedRoePcnt'])
+                else:
+                    roe = 0.0
 
+                time = position["timestamp"]
+                amount = float(info["currentQty"])
+                side = position['side']
+                print("found")
+                print(amount, time, side, roe)
+
+                if roe <= -0.2:
+                    print("need to cancel")
+                    if side == "long":
+                        self._make_market_sell_order(amount, params={"reduceOnly": True})
+                    else:
+                        self._make_market_buy_order(amount, params={"reduceOnly": True})
+                    continue
+                if roe >= 0.01:
+                    print("need to take profit")
+                    if side == "long":
+                        self._make_market_sell_order(amount, params={"reduceOnly": True})
+                    else:
+                        self._make_market_buy_order(amount, params={"reduceOnly": True})
+                    continue
+
+        except Exception as e:
+            print("Cannot analyze markets", e)
 
     def _run_strategy(self):
         self.analyze_positions()

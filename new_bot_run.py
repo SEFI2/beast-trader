@@ -28,8 +28,16 @@ def run_all_bots():
             "account_name": "ltc",
             "symbol": "LTCUSDT",
             "timeframe": "1m",
-            "strategy_func": strategy_supertrend,
+            "strategy_func": strategy_rsi_ma,
             "leverage": 4,
+            "precision": 1000
+        },
+        {
+            "account_name": "ltc",
+            "symbol": "SUIUSDT",
+            "timeframe": "1m",
+            "strategy_func": strategy_rsi_ma,
+            "leverage": 3,
             "precision": 1000
         },
         {
@@ -37,7 +45,7 @@ def run_all_bots():
             "symbol": "LINKUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 10,
+            "leverage": 3,
             "precision": 1000
         },
         {
@@ -45,7 +53,7 @@ def run_all_bots():
             "symbol": "SOLUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_ema_price_crossover,
-            "leverage": 15,
+            "leverage": 3,
             "precision": 10000
         },
         {
@@ -53,7 +61,7 @@ def run_all_bots():
             "symbol": "DOGEUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_ema_price_crossover,
-            "leverage": 5,
+            "leverage": 3,
             "precision": 1000
         },
         {
@@ -61,7 +69,7 @@ def run_all_bots():
             "symbol": "ETHUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 10,
+            "leverage": 4,
             "precision": 100000
         },
         {
@@ -78,7 +86,7 @@ def run_all_bots():
             "timeframe": "1m",
             "strategy_func": strategy_macd,
             "leverage": 2,
-            "precision": 1000
+            "precision": 10000
         },
         {
             "account_name": "kadirpili",
@@ -86,7 +94,7 @@ def run_all_bots():
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
             "leverage": 2,
-            "precision": 10000
+            "precision": 1000
         },
 
         {
@@ -118,7 +126,7 @@ def run_all_bots():
             time.sleep(1)
 
     execute_bots()
-    schedule.every(2).minutes.do(execute_bots)
+    schedule.every(20).seconds.do(execute_bots)
 
     while True:
         schedule.run_pending()

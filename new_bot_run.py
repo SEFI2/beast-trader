@@ -29,72 +29,83 @@ def run_all_bots():
             "symbol": "LTCUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 1,
-            "precision": 10000
+            "leverage": 10,
+            "precision": 10000,
+            "minAmount": 1,
         },
         {
-            "account_name": "ltc",
+            "account_name": "doge",
             "symbol": "SUIUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
             "leverage": 3,
-            "precision": 1000
+            "precision": 1000,
+            "minAmount": 1
         },
         {
             "account_name": "link",
             "symbol": "LINKUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 1,
-            "precision": 1000
+            "leverage": 4,
+            "precision": 1000,
+            "minAmount": 1
+
         },
         {
             "account_name": "sol",
             "symbol": "SOLUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_supertrend,
-            "leverage": 2,
-            "precision": 10000
+            "leverage": 5,
+            "precision": 10000,
+            "minAmount": 1
         },
         {
             "account_name": "doge",
             "symbol": "XRPUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_macd,
-            "leverage": 1,
-            "precision": 1000
+            "leverage": 5,
+            "precision": 1000,
+            "minAmount": 10
         },
         {
-            "account_name": "ether",
+            "account_name": "sol",
             "symbol": "ETHUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 2,
-            "precision": 100000
+            "leverage": 3,
+            "precision": 100000,
+            "minAmount": 1,
+
         },
         {
             "account_name": "ether",
-            "symbol": "NTRNUSDT",
+            "symbol": "XBTUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 3,
-            "precision": 1
+            "leverage": 5,
+            "precision": 1000,
+            "minAmount": 10,
         },
         {
             "account_name": "kadirpili",
             "symbol": "ADAUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_macd,
-            "leverage": 2,
-            "precision": 10000
+            "leverage": 5,
+            "precision": 1000,
+            "minAmount": 10,
         },
         {
             "account_name": "ether",
             "symbol": "APEUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 5,
-            "precision": 10
+            "leverage": 7,
+            "precision": 10,
+            "minAmount": 1,
         },
 
         {
@@ -102,8 +113,9 @@ def run_all_bots():
             "symbol": "MATICUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 3,
-            "precision": 1000
+            "leverage": 9,
+            "precision": 1000,
+            "minAmount": 10,
         },
     ]
     timeframe = "1m"
@@ -117,6 +129,8 @@ def run_all_bots():
             config["strategy_func"],
             config["leverage"],
             config["precision"],
+            config["minAmount"],
+            
         )
         bots.append(bot)
 

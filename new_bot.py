@@ -7,9 +7,10 @@ import pytz
 import time
 
 class Bot(BotBase):
-    def __init__(self, account_name, symbol, timeframe, strategy_func, leverage, precision):
+    def __init__(self, account_name, symbol, timeframe, strategy_func, leverage, precision, minAmount):
         super(Bot, self).__init__(account_name, symbol, timeframe, strategy_func, leverage, precision)
         self._init_leverage()
+        self.minAmount = minAmount
 
     def _make_stop_loss(self, side, price, amount):
         if side == "sell":
@@ -89,7 +90,7 @@ class Bot(BotBase):
  
 
     def _try_short_long(self, buy, sell):
-        price = self._get_price()
+        price = self._get_price() * self.minAmount
         leverage = self._get_leverage()
         balance = self._get_leveraged_balance()
         portions = [5, 3, 2, 1]
@@ -103,7 +104,7 @@ class Bot(BotBase):
 
         print(f"Current leverage balance {balance} at leverage {leverage} and budget {budget}")
         print(f"Trying short or long @{self.symbol} at price {price} with amount {amount}.")
-
+        print(f"Mint amount {self.minAmount}")
 
         amount *= self.precision
         if buy:

@@ -29,8 +29,8 @@ def run_all_bots():
             "symbol": "LTCUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 4,
-            "precision": 1000
+            "leverage": 1,
+            "precision": 10000
         },
         {
             "account_name": "ltc",
@@ -45,23 +45,23 @@ def run_all_bots():
             "symbol": "LINKUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 3,
+            "leverage": 1,
             "precision": 1000
         },
         {
             "account_name": "sol",
             "symbol": "SOLUSDT",
             "timeframe": "1m",
-            "strategy_func": strategy_ema_price_crossover,
-            "leverage": 3,
+            "strategy_func": strategy_supertrend,
+            "leverage": 2,
             "precision": 10000
         },
         {
             "account_name": "doge",
-            "symbol": "DOGEUSDT",
+            "symbol": "XRPUSDT",
             "timeframe": "1m",
-            "strategy_func": strategy_ema_price_crossover,
-            "leverage": 3,
+            "strategy_func": strategy_macd,
+            "leverage": 1,
             "precision": 1000
         },
         {
@@ -69,7 +69,7 @@ def run_all_bots():
             "symbol": "ETHUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 4,
+            "leverage": 2,
             "precision": 100000
         },
         {
@@ -77,8 +77,8 @@ def run_all_bots():
             "symbol": "NTRNUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 10,
-            "precision": 100000
+            "leverage": 3,
+            "precision": 1
         },
         {
             "account_name": "kadirpili",
@@ -89,12 +89,12 @@ def run_all_bots():
             "precision": 10000
         },
         {
-            "account_name": "kadirpili",
-            "symbol": "APTUSD",
+            "account_name": "ether",
+            "symbol": "APEUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 2,
-            "precision": 1000
+            "leverage": 5,
+            "precision": 10
         },
 
         {
@@ -102,8 +102,8 @@ def run_all_bots():
             "symbol": "MATICUSDT",
             "timeframe": "1m",
             "strategy_func": strategy_rsi_ma,
-            "leverage": 2,
-            "precision": 10000
+            "leverage": 3,
+            "precision": 1000
         },
     ]
     timeframe = "1m"
@@ -126,7 +126,7 @@ def run_all_bots():
             time.sleep(1)
 
     execute_bots()
-    schedule.every(20).seconds.do(execute_bots)
+    schedule.every(10).seconds.do(execute_bots)
 
     while True:
         schedule.run_pending()

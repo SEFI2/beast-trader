@@ -1,14 +1,14 @@
-`init/` folder to get the data and test strategies
+The 'init/' directory serves as the repository for acquiring data and testing various strategies.
 
-Different subaccounts have been created to save leverages losses.
-Each bot consist of the symbol, name of the subaccount, and the strategy.
-They are are run every each 2 minutes.
+Distinct subaccounts have been established to mitigate leverage-associated losses. Each bot is characterized by its symbol, designated subaccount, and specific strategy. These bots are executed at regular intervals of every 2 minutes.
 
-To find the best strategy, the past data was retrieved and backtested for each dataframe grouped by every 2 days using vectorvbt. Plot the results or automatically choose the strategy based on the returns.
+In the pursuit of identifying the most effective strategy, historical data was extracted and systematically backtested across different dataframes, segmented by intervals of 2 days using the powerful vectorvbt library. The outcomes were either visually depicted through plotted results or algorithmically determined by maximizing returns.
 
-new_bot_base.py - Base class for the Bot
-new_bot.py - Bot with functionalities for the Bot
-new_bot_run.py - To run all the bots
+Key files within this framework include:
 
-draft_bot.py - First version of the live bot
+- new_bot_base.py: Serving as the foundational class for the Bot
+- new_bot.py: Encompassing functionalities specific to the Bot
+- new_bot_run.py: Enabling the simultaneous execution of all bots
+
+Additionally, the preliminary version of the live bot, denoted as draft_bot.py, is also part of this array of functionalities.
 

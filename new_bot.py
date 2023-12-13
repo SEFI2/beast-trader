@@ -4,11 +4,13 @@ import numpy as np
 from datetime import datetime
 from dateutil import parser
 import pytz
+import time
 
 class Bot(BotBase):
     def __init__(self, account_name, symbol, timeframe, strategy_func, leverage, precision):
         super(Bot, self).__init__(account_name, symbol, timeframe, strategy_func, leverage, precision)
-    
+        self._init_leverage()
+
     def _make_stop_loss(self, side, price, amount):
         if side == "sell":
             stop_loss = price + price * 0.01
@@ -50,11 +52,14 @@ class Bot(BotBase):
         return False
 
     def _risk_manager(self, side, price, amount):
-        return self._make_stop_loss(side, price, amount) and self._make_take_profit(side, price, amount)            
+        #return self._make_stop_loss(side, price, amount) and self._make_take_profit(side, price, amount)            
+        return True
 
     def _try_long(self, amount):
         print(f"Trying to buy for {self.symbol}.")
-        order = self._make_market_buy_order(amount)
+        order = self._make_market_buy_order(amount, {
+            "leverage": self._get_leverage()
+        })
         print("long order", order)
         if order is not None:
             return True
@@ -62,22 +67,36 @@ class Bot(BotBase):
 
     def _try_short(self, amount):
         print(f"Trying to sell for {self.symbol}.")
-        order = self._make_market_sell_order(amount)
+        order = self._make_market_sell_order(amount, {
+            "leverage": self._get_leverage()
+        })
         print("short order", order)
         if order is not None:
             return True
         return False
 
+    def _init_leverage(self):
+        try:
+            self.exchange.private_post_position_leverage(
+                {
+                    "symbol": self.symbol, 
+                    "leverage": self._get_leverage()
+                }
+            )
+            time.sleep(0.1)
+        except Exception as e:
+            print("cannot init leverage", e)
+ 
+
     def _try_short_long(self, buy, sell):
         price = self._get_price()
         leverage = self._get_leverage()
         balance = self._get_leveraged_balance()
-        portions = [10, 5, 3, 2, 1]
+        portions = [5, 3, 2, 1]
         for portion in portions: 
             budget = balance / portion
             if (budget / price) * self.precision >= self.precision:
                 print(f"@{self.symbol} found precision at portion {portion}")
-                budget = balance
                 break
             
         amount = budget / price
@@ -89,14 +108,13 @@ class Bot(BotBase):
         amount *= self.precision
         if buy:
             if self._try_long(amount):
-                return True
-                #return self._risk_manager("buy", price, amount)
+                #return True
+                return self._risk_manager("buy", price, amount)
             return False
         elif sell:
             if self._try_short(amount):
-                return True
-                #return self._risk_manager("sell", price, amount)
-        self.exchange.private_get_position()
+                #return True
+                return self._risk_manager("sell", price, amount)
         return False
 
     def _data_last_time(self):
@@ -110,7 +128,9 @@ class Bot(BotBase):
                 info = position["info"]
                 if info["symbol"] != self.symbol:
                     continue
-                
+                is_open = info["isOpen"]
+                if is_open is None or is_open is False:
+                    continue
                 roe = info['unrealisedRoePcnt']
 
                 if "unrealisedRoePcnt" in info:
@@ -124,7 +144,7 @@ class Bot(BotBase):
                 print("found")
                 print(amount, time, side, roe)
 
-                if roe <= -0.2:
+                if roe <= -0.03:
                     print("need to cancel")
                     if side == "long":
                         self._make_market_sell_order(amount, params={"reduceOnly": True})
@@ -143,11 +163,10 @@ class Bot(BotBase):
             print("Cannot analyze markets", e)
 
     def _run_strategy(self):
-        self.analyze_positions()
-
         (buy, sell) = self._strategy_signal()
         if buy is np.True_ or buy is np.True_:
             return self._try_short_long(buy, sell)
+        print(f"No signals at all for {self.symbol}")
         return False
 
     def _strategy_signal(self):
@@ -162,6 +181,9 @@ class Bot(BotBase):
             return False    
 
     def _start(self):
+        
+        self.analyze_positions()
+
         balance = self._get_balance()
         if balance == 0:
             print("ERR! {self.symbol} - No user balance")

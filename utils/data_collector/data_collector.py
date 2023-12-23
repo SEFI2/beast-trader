@@ -6,20 +6,6 @@ from datetime import datetime, timedelta
 import time
 import os
 
-# Define the symbol and timeframe
-symbol = 'ETHUSDT'  # Example symbol
-timeframe = '1m'     # Example timeframe
-
-# Initialize the exchange
-exchange = ccxt.bitmex({
-    #'apiKey': "nQEbL79NBi7cN65VQXSCvmSo",
-    #'secret': "R74OKyy8W-xJHmTL3DsGIno32EqLwhA9hRmXvYvLWZ8-I4Zc",
-    'apiKey': '0y7QTbMmps5eWg-fmGS3uOC0',
-    'secret': 'YWZOQMzCFchD4t05CxE0ptuIgcAblctmdxpH4GVlNKC1Yaxl',
-})
-exchange.set_sandbox_mode(True)
-
-
 class DataCollector:
     def __init__(self, exchange, symbol, timeframe):
         self.symbol = symbol

@@ -1,6 +1,6 @@
 from strategy_finder.strategy_finder import StrategyFinder
-from data_collector.data_collector import DataCollector
-from strategy_finder.stategy_sorter import find_best_strategy
+from utils.data_collector.data_collector import DataCollector
+from train.strategy_finder.stategy_sorter import find_best_strategy
 import pandas as pd
 import os
 import plotly.express as px

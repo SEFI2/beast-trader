@@ -1,8 +1,8 @@
 
 
 import ccxt
-from accounts import accounts
-from data_collector.data_collector import DataCollector
+from utils.accounts import accounts
+from utils.data_collector.data_collector import DataCollector
 import time
 
 class BotBase:

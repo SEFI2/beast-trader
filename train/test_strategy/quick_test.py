@@ -67,7 +67,8 @@ def run():
     
 
 from test_strategy.test_strategy import test_one_strategy
-from volatility.volatility import check_market_volatility
+from utils.volatility.volatility import if_market_volatile
+
 def run_one():
     timeframe = "1m"
     all_symbols = []
@@ -75,7 +76,7 @@ def run_one():
 
     data_collector = DataCollector(exchange, symbol, timeframe)
     df = data_collector.get_live_data()
-    if check_market_volatility(df, 0.5):
+    if if_market_volatile(df, 0.5):
         print(f"{symbol} market too volatile to enter")
 
     (entry_trades, exit_trades, returns) = test_one_strategy(df, strategy_supertrend)

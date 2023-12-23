@@ -1,5 +1,5 @@
-from new_bot_base import BotBase
-from volatility.volatility import if_market_volatile
+from bot.bot_base import BotBase
+from utils.volatility.volatility import if_market_volatile
 import numpy as np
 from datetime import datetime
 from dateutil import parser
@@ -48,6 +48,7 @@ class Bot(BotBase):
                 "stopPrice": take_profit
             }
         )
+
         if take_profit_order:
             return True
         return False
